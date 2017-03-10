@@ -1,11 +1,11 @@
 ﻿using Microsoft.Xna.Framework.Graphics;
 using StardewModdingAPI;
+using StardewValley;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using TehPers.Stardew.Framework;
 using TehPers.Stardew.SCCL.Configs;
 using TehPers.Stardew.SCCL.Content;
 using xTile.Dimensions;
@@ -23,7 +23,7 @@ namespace TehPers.Stardew.SCCL.API {
         public string Name { get; }
 
         public bool Enabled {
-            get => !ModEntry.INSTANCE.config.DisabledMods.Contains(Name);
+            get => !ModEntry.INSTANCE.config.DisabledMods.Contains(this.Name);
             set {
                 ModConfig config = ModEntry.INSTANCE.config;
                 bool changed = value != this.Enabled;
@@ -35,8 +35,8 @@ namespace TehPers.Stardew.SCCL.API {
 
                 if (changed) {
                     ModEntry.INSTANCE.Helper.WriteConfig(config);
-                    foreach (string asset in ModContent.Keys)
-                        this.RefreshAsset(asset);
+                    foreach (string asset in this.ModContent.Keys)
+                        RefreshAsset(asset);
                 }
             }
         }
@@ -55,16 +55,17 @@ namespace TehPers.Stardew.SCCL.API {
          **/
         public bool RegisterAsset<T>(string assetName, T asset) {
             assetName = assetName.Replace('/', '\\');
+            if (assetName.EndsWith(".xnb")) assetName = assetName.Substring(0, assetName.Length - 4);
 
-            if (!ModContent.ContainsKey(assetName))
-                ModContent[assetName] = new HashSet<object>();
+            if (!this.ModContent.ContainsKey(assetName))
+                this.ModContent[assetName] = new HashSet<object>();
 
-            if (asset is Texture2D) ModContent[assetName].Add(new OffsetTexture2D(asset as Texture2D));
-            else ModContent[assetName].Add(asset);
+            if (asset is Texture2D) this.ModContent[assetName].Add(new OffsetTexture2D(asset as Texture2D));
+            else this.ModContent[assetName].Add(asset);
 
-            this.RefreshAsset(assetName);
+            RefreshAsset(assetName);
 
-            ModEntry.INSTANCE.Monitor.Log($"[{Name}] Registered {assetName} ({typeof(T).ToString()})", LogLevel.Trace);
+            ModEntry.INSTANCE.Monitor.Log($"[{this.Name}] Registered {assetName} ({typeof(T).ToString()})", LogLevel.Trace);
 
             return true;
         }
@@ -88,7 +89,7 @@ namespace TehPers.Stardew.SCCL.API {
          * <returns>Whether the texture was registered successfully. If false, then the asset was probably the wrong type</returns>
          **/
         public bool RegisterTexture(string assetName, Texture2D texture, int xOff = 0, int yOff = 0) {
-            return this.RegisterAsset(assetName, new OffsetTexture2D(texture, xOff, yOff));
+            return RegisterAsset(assetName, new OffsetTexture2D(texture, xOff, yOff));
         }
 
         /// <summary>Registers all the assets relative to the directory <paramref name="path"/></summary>
@@ -103,19 +104,47 @@ namespace TehPers.Stardew.SCCL.API {
 
                 // Go through each xnb file
                 foreach (string xnb in Directory.GetFiles(dir, "*.xnb")) {
-                    try {
-                        string localModPath = Helpers.LocalizePath(path, xnb);
-                        localModPath = localModPath.Substring(0, localModPath.Length - 4).Replace('/', '\\');
-                        object modAsset = ModEntry.INSTANCE.modContent.Load<object>(localModPath);
+                    RegisterFileAsset(path, xnb);
+                }
 
-                        if (modAsset != null) {
-                            RegisterAsset(localModPath.Substring(localModPath.IndexOf('\\') + 1), modAsset);
-                        }
-                    } catch (Exception) {
-                        ModEntry.INSTANCE.Monitor.Log($"Unable to load {xnb}", LogLevel.Warn);
-                    }
+                // Go through each png file
+                foreach (string png in Directory.GetFiles(dir, "*.png")) {
+                    RegisterFileAsset(path, png);
                 }
             }
+        }
+
+        /// <summary>Registers the xnb or png file at the given path with the given base directory</summary>
+        /// <param name="baseDir">The root directory of your content</param>
+        /// <param name="filePath">The absolute path to the file</param>
+        /// <returns>Whether the asset was successfully registered</returns>
+        public bool RegisterFileAsset(string baseDir, string filePath) {
+            if (filePath.EndsWith(".xnb", StringComparison.CurrentCultureIgnoreCase)) {
+                try {
+                    string localModPath = Helpers.LocalizePath(ModEntry.CONTENT_DIRECTORY, filePath);
+                    localModPath = localModPath.Substring(0, localModPath.Length - 4).Replace('/', '\\');
+                    object modAsset = ModEntry.INSTANCE.contentManager.Load<object>(localModPath);
+
+                    if (modAsset != null) {
+                        return RegisterAsset(Helpers.LocalizePath(baseDir, filePath), modAsset);
+                    }
+                } catch (Exception) {
+                    ModEntry.INSTANCE.Monitor.Log($"Unable to load {filePath}", LogLevel.Warn);
+                }
+            } else if (filePath.EndsWith(".png", StringComparison.CurrentCultureIgnoreCase)) {
+                try {
+                    using (FileStream stream = File.Open(filePath, FileMode.Open)) {
+                        Texture2D modAsset = Texture2D.FromStream(Game1.graphics.GraphicsDevice, stream);
+
+                        if (modAsset != null) {
+                            return RegisterAsset(Helpers.LocalizePath(baseDir, filePath.Substring(0, filePath.Length - 4)), modAsset);
+                        }
+                    }
+                } catch (Exception) {
+                    ModEntry.INSTANCE.Monitor.Log($"Unable to load {filePath}", LogLevel.Warn);
+                }
+            }
+            return false;
         }
 
         /**
@@ -127,9 +156,9 @@ namespace TehPers.Stardew.SCCL.API {
         public bool UnregisterAsset(string assetName, object asset) {
             assetName = assetName.Replace('/', '\\');
 
-            if (ModContent.ContainsKey(assetName) && ModContent[assetName].Remove(asset)) {
-                ModEntry.INSTANCE.Monitor.Log(string.Format("[{2}] Unregistered {0} ({1})", assetName, asset.GetType().ToString(), Name), LogLevel.Trace);
-                this.RefreshAsset(assetName);
+            if (this.ModContent.ContainsKey(assetName) && this.ModContent[assetName].Remove(asset)) {
+                ModEntry.INSTANCE.Monitor.Log($"[{this.Name}] Unregistered {assetName} ({asset.GetType().ToString()})", LogLevel.Trace);
+                RefreshAsset(assetName);
                 return true;
             }
             return false;

@@ -8,9 +8,4 @@
   <PropertyGroup Label="Configuration">
     <Import_RootNamespace>TehPers.Stardew.Framework</Import_RootNamespace>
   </PropertyGroup>
-  <ItemGroup>
-    <Compile Include="$(MSBuildThisFileDirectory)Enums.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Helpers.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Objects.cs" />
-  </ItemGroup>
 </Project>

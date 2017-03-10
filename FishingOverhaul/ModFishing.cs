@@ -10,7 +10,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using TehPers.Stardew.FishingOverhaul.Configs;
-using TehPers.Stardew.Framework;
+using TehPers.Stardew.SCCL;
+using TehPers.Stardew.SCCL.Enums;
 using SObject = StardewValley.Object;
 
 namespace TehPers.Stardew.FishingOverhaul {
@@ -45,7 +46,7 @@ namespace TehPers.Stardew.FishingOverhaul {
             this.config.AdditionalLootChance = (float) Math.Min(this.config.AdditionalLootChance, 0.99);
             helper.WriteConfig(this.config);
 
-            OnLanguageChange(LocalizedContentManager.CurrentLanguageCode);
+            OnLanguageChange(this, new EventArgsValueChanged<string>(null, null));
 
             // Stop here if the mod is disabled
             if (!config.ModEnabled) return;
@@ -53,7 +54,7 @@ namespace TehPers.Stardew.FishingOverhaul {
             // Events
             GameEvents.UpdateTick += this.UpdateTick;
             ControlEvents.KeyPressed += KeyPressed;
-            LocalizedContentManager.OnLanguageChange += OnLanguageChange;
+            ContentEvents.AfterLocaleChanged += OnLanguageChange;
         }
 
         #region Events
@@ -93,9 +94,9 @@ namespace TehPers.Stardew.FishingOverhaul {
                 if (Game1.currentLocation != null) {
                     int[] possibleFish;
                     if (Game1.currentLocation is MineShaft)
-                        possibleFish = FishHelper.getPossibleFish(5, (Game1.currentLocation as MineShaft).mineLevel).Select(f => f.Key).ToArray();
+                        possibleFish = FishHelper.GetPossibleFish(5, (Game1.currentLocation as MineShaft).mineLevel).Select(f => f.Key).ToArray();
                     else
-                        possibleFish = FishHelper.getPossibleFish(5, -1).Select(f => f.Key).ToArray();
+                        possibleFish = FishHelper.GetPossibleFish(5, -1).Select(f => f.Key).ToArray();
                     Dictionary<int, string> fish = Game1.content.Load<Dictionary<int, string>>("Data\\Fish");
                     string[] fishByName = (
                         from id in possibleFish
@@ -110,7 +111,7 @@ namespace TehPers.Stardew.FishingOverhaul {
             }
         }
 
-        private void OnLanguageChange(LocalizedContentManager.LanguageCode code) {
+        private void OnLanguageChange(object sender, EventArgsValueChanged<string> e) {
             //Directory.CreateDirectory(Path.Combine(this.Helper.DirectoryPath, "Translations"));
             this.strings = Helper.ReadJsonFile<ConfigStrings>("Translations/" + Helpers.GetLanguageCode() + ".json") ?? new ConfigStrings();
             Helper.WriteJsonFile("Translations/" + Helpers.GetLanguageCode() + ".json", this.strings);

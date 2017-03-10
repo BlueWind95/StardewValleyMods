@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using TehPers.Stardew.Framework;
+using TehPers.Stardew.SCCL.Enums;
 
 namespace TehPers.Stardew.SCCL.Items {
     public class ModObject : StardewValley.Object {

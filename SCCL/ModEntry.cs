@@ -17,6 +17,9 @@ using TehPers.Stardew.SCCL.Testing;
 namespace TehPers.Stardew.SCCL {
     public class ModEntry : Mod {
         internal static ModEntry INSTANCE;
+        internal static string CONTENT_DIRECTORY = Constants.ExecutionPath;
+
+        internal LocalizedContentManager contentManager;
 
         public const bool SI_COMPAT = false; // Experimental compatibility with SeasonalImmersion
         public const int MOD_INDEX = 10000;
@@ -27,7 +30,6 @@ namespace TehPers.Stardew.SCCL {
 
         // SCCL Content folder loading
         public string contentPath;
-        public ContentManager modContent;
 
         private List<Type> injectedTypes = new List<Type>();
         private bool loaded = false;
@@ -54,6 +56,7 @@ namespace TehPers.Stardew.SCCL {
                 }
             }
 
+            this.contentManager = new LocalizedContentManager(Game1.game1.Services, Constants.ExecutionPath);
             this.itemLoader = new ItemLoader();
             this.merger = new ContentMerger();
 
@@ -110,7 +113,6 @@ namespace TehPers.Stardew.SCCL {
         #region XNB Content Registering
         private void LoadFromFolder(object sender, EventArgs e) {
             this.Monitor.Log("Loading delegates", LogLevel.Info);
-            this.modContent = this.modContent ?? new ContentManager(Game1.content.ServiceProvider, this.contentPath);
 
             // Get all xnbs that need delegates
             foreach (string mod in Directory.GetDirectories(Path.Combine(Helper.DirectoryPath, "Content"))) {

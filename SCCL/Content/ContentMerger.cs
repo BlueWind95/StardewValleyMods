@@ -7,7 +7,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using TehPers.Stardew.Framework;
 using TehPers.Stardew.SCCL.API;
 using TehPers.Stardew.SCCL.Configs;
 using xTile.Dimensions;

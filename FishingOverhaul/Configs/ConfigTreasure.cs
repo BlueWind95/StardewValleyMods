@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using TehPers.Stardew.Framework;
-using static TehPers.Stardew.Framework.Helpers;
+using TehPers.Stardew.SCCL.Enums;
+using static TehPers.Stardew.SCCL.Helpers;
 
 namespace TehPers.Stardew.FishingOverhaul.Configs {
     public class ConfigTreasure {
@@ -63,6 +63,7 @@ namespace TehPers.Stardew.FishingOverhaul.Configs {
         };
 
         public class TreasureData : IWeighted {
+#pragma warning disable IDE1006 // Naming Styles - I'd fix this but it'd break configs
             public int id { get; set; }
             public double chance { get; set; }
             public int minAmount { get; set; }
@@ -74,6 +75,7 @@ namespace TehPers.Stardew.FishingOverhaul.Configs {
             public int idRange { get; set; }
             public bool meleeWeapon { get; set; }
             public bool allowDuplicates { get; set; }
+#pragma warning restore IDE1006 // Naming Styles
 
             public TreasureData(int id, double chance, int minAmount = 1, int maxAmount = 1, int minDistance = 0, int minLevel = 0, int maxLevel = 10, int idRange = 1, bool meleeWeapon = false, bool allowDuplicates = true) {
                 this.id = id;
@@ -88,7 +90,7 @@ namespace TehPers.Stardew.FishingOverhaul.Configs {
                 this.allowDuplicates = allowDuplicates;
             }
 
-            public bool isValid(int level, int distance) {
+            public bool IsValid(int level, int distance) {
                 return level >= this.minLevel && (this.maxLevel >= 10 || level <= this.maxLevel) &&
                     distance >= this.minCastDistance;
             }

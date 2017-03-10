@@ -8,7 +8,6 @@ using System.Collections.Generic;
 using TehPers.Stardew.FishingOverhaul.Configs;
 using static TehPers.Stardew.FishingOverhaul.Configs.ConfigFish;
 using System.Linq;
-using TehPers.Stardew.Framework;
 using StardewValley.Tools;
 using SFarmer = StardewValley.Farmer;
 
@@ -43,7 +42,7 @@ namespace TehPers.Stardew.FishingOverhaul {
 
         public CustomBobberBar(SFarmer user, int whichFish, float fishSize, bool treasure, int bobber, int waterDepth) : base(whichFish, fishSize, treasure, bobber) {
             this.user = user;
-            this.origStreak = FishHelper.getStreak(user);
+            this.origStreak = FishHelper.GetStreak(user);
 
             /* Private field hooks */
             treasureField = ModFishing.INSTANCE.Helper.Reflection.GetPrivateField<bool>(this, "treasure");
@@ -94,7 +93,7 @@ namespace TehPers.Stardew.FishingOverhaul {
             // Increase the user's perfect streak (this will be dropped to 0 if they don't get a perfect catch)
             if (this.origStreak >= config.StreakForIncreasedQuality)
                 sparkleTextField.SetValue(new SparklingText(Game1.dialogueFont, string.Format(strings.StreakDisplay, this.origStreak), Color.Yellow, Color.White, false, 0.1, 2500, -1, 500));
-            FishHelper.setStreak(user, this.origStreak + 1);
+            FishHelper.SetStreak(user, this.origStreak + 1);
         }
 
         public override void update(GameTime time) {
@@ -122,8 +121,8 @@ namespace TehPers.Stardew.FishingOverhaul {
             if (!perfectChanged && !perfect) {
                 perfectChanged = true;
                 fishQualityField.SetValue(Math.Min(this.origQuality, 1));
-                int streak = FishHelper.getStreak(this.user);
-                FishHelper.setStreak(this.user, 0);
+                int streak = FishHelper.GetStreak(this.user);
+                FishHelper.SetStreak(this.user, 0);
                 if (this.origStreak >= ModFishing.INSTANCE.config.StreakForIncreasedQuality) {
                     if (!treasure)
                         Game1.showGlobalMessage(string.Format(strings.LostStreak, this.origStreak));
@@ -159,7 +158,7 @@ namespace TehPers.Stardew.FishingOverhaul {
                     notifiedFailOrSucceed = true;
                     if (this.origStreak >= ModFishing.INSTANCE.config.StreakForIncreasedQuality)
                         Game1.showGlobalMessage(string.Format(strings.KeptStreak, this.origStreak));
-                    FishHelper.setStreak(this.user, this.origStreak);
+                    FishHelper.SetStreak(this.user, this.origStreak);
                 }
             }
         }

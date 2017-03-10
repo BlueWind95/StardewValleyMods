@@ -1,10 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace TehPers.Stardew.Framework {
+namespace TehPers.Stardew.SCCL.Enums {
     public enum WaterType : int {
         /** <summary>Game ID is 1</summary> **/
         LAKE = 1,

@@ -17,7 +17,7 @@
     <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
+    <PlatformTarget>x86</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
@@ -39,6 +39,9 @@
     <StartupObject />
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="SCCL">
+      <HintPath>..\..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Stardew Valley\Mods\!SCCL\SCCL.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -50,10 +53,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ExplodingJunimo.cs" />
+    <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="JunimoRod.cs" />
     <Compile Include="ModConfig.cs" />
     <Compile Include="ModEntry.cs" />
-    <Compile Include="ModWeapon.cs" />
     <Compile Include="Natures\NatureEnto.cs" />
     <Compile Include="Natures\NatureFaythe.cs" />
     <Compile Include="Natures\Nature.cs" />
@@ -69,11 +72,11 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Credits.txt" />
-    <Content Include="resources\EntoScepter.png" />
-    <Content Include="resources\FaytheScepter.png" />
-    <Content Include="resources\FireScepter.png" />
-    <Content Include="resources\LifeScepter.png" />
-    <Content Include="resources\LusidityScepter.png" />
+    <Content Include="resources\Scepters\Ento.png" />
+    <Content Include="resources\Scepters\Faythe.png" />
+    <Content Include="resources\Scepters\Fire.png" />
+    <Content Include="resources\Scepters\Life.png" />
+    <Content Include="resources\Scepters\Lusidity.png" />
   </ItemGroup>
   <ItemGroup />
   <Import Project="..\Framework\Framework.projitems" Label="Shared" />
@@ -99,13 +102,13 @@
     <CreateItem Include="$(TargetDir)*.dll">
       <Output TaskParameter="Include" ItemName="DLLFiles" />
     </CreateItem>
-    <ItemGroup>
-      <ModResources Include="resources\*.*" />
-    </ItemGroup>
+    <CreateItem Include="resources\**\*.*">
+        <Output TaskParameter="Include" ItemName="ModResources" />
+    </CreateItem>
     <Copy SourceFiles="@(DLLFiles)" DestinationFolder="$(ModPath)" />
     <Copy SourceFiles="$(TargetDir)$(TargetName).pdb" DestinationFolder="$(ModPath)" Condition="Exists('$(TargetDir)$(TargetName).pdb')" />
     <Copy SourceFiles="$(TargetDir)$(TargetName).dll.mdb" DestinationFolder="$(ModPath)" Condition="Exists('$(TargetDir)$(TargetName).dll.mdb')" />
     <Copy SourceFiles="$(ProjectDir)manifest.json" DestinationFolder="$(ModPath)" />
-    <Copy SourceFiles="@(ModResources)" DestinationFolder="$(ModPath)\resources" />
+    <Copy SourceFiles="@(ModResources)" DestinationFiles="@(ModResources->'$(ModPath)\resources\%(RecursiveDir)%(Filename)%(Extension)')" />
   </Target>
 </Project>

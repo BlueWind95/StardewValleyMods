@@ -51,6 +51,9 @@
     <Compile Include="Configs\EventConfig.cs" />
     <Compile Include="Configs\ModConfig.cs" />
     <Compile Include="Content\OffsetTexture2D.cs" />
+    <Compile Include="Enums\LocationEnums.cs" />
+    <Compile Include="Enums\Objects.cs" />
+    <Compile Include="Helpers.cs" />
     <Compile Include="Items\ItemData.cs" />
     <Compile Include="Items\ItemLoader.cs" />
     <Compile Include="Items\ItemTemplate.cs" />

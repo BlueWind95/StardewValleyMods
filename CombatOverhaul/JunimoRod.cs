@@ -5,9 +5,32 @@ using SFarmer = StardewValley.Farmer;
 using StardewValley.Tools;
 using System;
 using TehPers.Stardew.CombatOverhaul.Natures;
+using TehPers.Stardew.SCCL.Items;
+using System.Collections.Generic;
 
 namespace TehPers.Stardew.CombatOverhaul {
-    public class JunimoRod : Tool {
+    public class JunimoRod : ItemTemplate {
+
+        public JunimoRod(string id) : base(id) {
+
+        }
+
+        public override string GetDescription(Dictionary<string, object> data) {
+            return "Your mother";
+        }
+
+        public override string GetName(Dictionary<string, object> data) {
+            return "Junimo Rod";
+        }
+
+        public override Texture2D GetTexture(Dictionary<string, object> data) {
+            return Game1.content.Load<Texture2D>("Scepters/Fire");
+        }
+
+
+        #region Old Code
+#pragma warning disable CRRSP02
+        /*
         private Nature _activeNature = null;
         public Nature ActiveNature {
             get {
@@ -39,8 +62,9 @@ namespace TehPers.Stardew.CombatOverhaul {
             this.CurrentParentTileIndex = this.indexOfMenuItemView;
             this.instantUse = true;
         }
-
-        public override void DoFunction(GameLocation location, int x, int y, int power, SFarmer who) {
+        
+        // override
+        public void DoFunction(GameLocation location, int x, int y, int power, SFarmer who) {
             who.completelyStopAnimatingOrDoingAction();
             this.indexOfMenuItemView = 2;
             this.CurrentParentTileIndex = 2;
@@ -48,7 +72,8 @@ namespace TehPers.Stardew.CombatOverhaul {
             this.CurrentParentTileIndex = this.indexOfMenuItemView;
         }
 
-        public override bool actionWhenPurchased() {
+        // override
+        public bool actionWhenPurchased() {
             // Todo: Probably some event that introduces the rod
             return base.actionWhenPurchased();
         }
@@ -86,7 +111,8 @@ namespace TehPers.Stardew.CombatOverhaul {
             }
         }
 
-        public override void drawInMenu(SpriteBatch spriteBatch, Vector2 location, float scaleSize, float transparency, float layerDepth, bool drawStackNumber) {
+        // override
+        public void drawInMenu(SpriteBatch spriteBatch, Vector2 location, float scaleSize, float transparency, float layerDepth, bool drawStackNumber) {
             if (ActiveNature == null) {
                 Rectangle rect = Game1.getSquareSourceRectForNonStandardTileSheet(Game1.toolSpriteSheet, Game1.tileSize / 4, Game1.tileSize / 4, this.indexOfMenuItemView);
                 spriteBatch.Draw(Game1.toolSpriteSheet, location + new Vector2(Game1.tileSize / 2, Game1.tileSize / 2), new Rectangle?(rect), Color.White * transparency, 0.0f, new Vector2(Game1.tileSize / 4 / 2, Game1.tileSize / 4 / 2), Game1.pixelZoom * scaleSize, SpriteEffects.None, layerDepth);
@@ -105,5 +131,20 @@ namespace TehPers.Stardew.CombatOverhaul {
         protected override string loadDescription() {
             throw new NotImplementedException();
         }
+
+        public override string GetName(Dictionary<string, object> data) {
+            throw new NotImplementedException();
+        }
+
+        public override string GetDescription(Dictionary<string, object> data) {
+            throw new NotImplementedException();
+        }
+
+        public override void GetTexture(Dictionary<string, object> data) {
+            throw new NotImplementedException();
+        }
+        */
+#pragma warning restore
+        #endregion
     }
 }

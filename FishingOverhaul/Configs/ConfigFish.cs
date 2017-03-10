@@ -1,9 +1,10 @@
-﻿using StardewModdingAPI;
+﻿using Microsoft.Xna.Framework;
+using StardewModdingAPI;
 using StardewValley;
 using System;
 using System.Collections.Generic;
-using TehPers.Stardew.Framework;
-using static TehPers.Stardew.Framework.Helpers;
+using TehPers.Stardew.SCCL;
+using TehPers.Stardew.SCCL.Enums;
 
 namespace TehPers.Stardew.FishingOverhaul.Configs {
     public class ConfigFish {
@@ -55,8 +56,7 @@ namespace TehPers.Stardew.FishingOverhaul.Configs {
                         WaterType water = Helpers.ConvertWaterType(Convert.ToInt32(seasonData[j + 1])) ?? WaterType.BOTH;
 
                         // From fish data
-                        FishData f;
-                        if (possibleFish.TryGetValue(id, out f)) {
+                        if (possibleFish.TryGetValue(id, out FishData f)) {
                             f.WaterType |= water;
                             f.Season |= s;
                         } else if (fish.ContainsKey(id)) {
@@ -93,7 +93,7 @@ namespace TehPers.Stardew.FishingOverhaul.Configs {
 
             // Glacierfish
             this.PossibleFish["Forest"][775] = new FishData(.02, WaterType.RIVER, Season.WINTER, maxTime: 2000, minDepth: 5, minLevel: 6);
-
+            
             // Crimsonfish
             this.PossibleFish["Beach"][159] = new FishData(.02, WaterType.BOTH, Season.SUMMER, maxTime: 2000, minDepth: 4, minLevel: 5);
 
@@ -125,7 +125,7 @@ namespace TehPers.Stardew.FishingOverhaul.Configs {
             public Weather Weather { get; set; }
             public int MineLevel { get; set; }
 
-            public FishData(double chance, WaterType waterType, Season season, int minTime = 600, int maxTime = 2600, int minDepth = 0, int minLevel = 0, Weather weather = Weather.BOTH, int mineLevel = -1) {
+            internal FishData(double chance, WaterType waterType, Season season, int minTime = 600, int maxTime = 2600, int minDepth = 0, int minLevel = 0, Weather weather = Weather.BOTH, int mineLevel = -1) {
                 this.Chance = chance;
                 this.WaterType = waterType;
                 this.Season = season;
@@ -137,11 +137,11 @@ namespace TehPers.Stardew.FishingOverhaul.Configs {
                 this.MineLevel = mineLevel;
             }
 
-            public bool meetsCriteria(WaterType waterType, Season season, Weather weather, int time, int depth, int level) {
+            internal bool meetsCriteria(WaterType waterType, Season season, Weather weather, int time, int depth, int level) {
                 return (this.WaterType & waterType) > 0 && (this.Season & season) > 0 && (this.Weather & weather) > 0 && this.MinTime <= time && this.MaxTime >= time && depth >= this.MinCastDistance && level >= this.MinLevel;
             }
 
-            public bool meetsCriteria(WaterType waterType, Season season, Weather weather, int time, int depth, int level, int mineLevel) {
+            internal bool meetsCriteria(WaterType waterType, Season season, Weather weather, int time, int depth, int level, int mineLevel) {
                 return this.meetsCriteria(waterType, season, weather, time, depth, level) && (this.MineLevel == -1 || mineLevel == this.MineLevel);
             }
 

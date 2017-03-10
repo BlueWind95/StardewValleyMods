@@ -6,7 +6,6 @@ using StardewValley.Locations;
 using StardewValley.Objects;
 using System.Collections.Generic;
 using System.Linq;
-using TehPers.Stardew.Framework;
 using SObject = StardewValley.Object;
 
 namespace TehPers.Stardew.SCCL.Items {
@@ -63,7 +62,7 @@ namespace TehPers.Stardew.SCCL.Items {
             ModEntry.INSTANCE.Monitor.Log("Loading mod items...");
             //string path = $"{Constants.SaveFolderName}/modItems.json";
             string path = "modItems.json";
-            HashSet<ItemData> data = ModEntry.INSTANCE.Helper.ReadJsonFile<HashSet<ItemData>>(path);
+            HashSet<ItemData> data = ModEntry.INSTANCE.Helper.ReadJsonFile<HashSet<ItemData>>(path) ?? new HashSet<ItemData>();
 
             foreach (ItemData item in data) {
                 if (ItemTemplate.Templates.TryGetValue(item.ItemID, out ItemTemplate template)) {

@@ -1,16 +1,15 @@
-﻿using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
-using StardewValley;
+﻿using StardewValley;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Reflection;
-using TehPers.Stardew.Framework;
+using TehPers.Stardew.SCCL.Enums;
 
-namespace TehPers.Stardew.Framework {
+namespace TehPers.Stardew.SCCL {
 
-    internal static class Helpers {
+    public static class Helpers {
         public static T CopyFields<T>(T original, T target) {
             Type typ = original.GetType();
             while (typ != null) {
@@ -41,9 +40,9 @@ namespace TehPers.Stardew.Framework {
         public static HashSet<T> ToHashSet<T>(this IEnumerable<T> source) => new HashSet<T>(source);
 
         public static string LocalizePath(string baseDir, string otherDir) {
-            Uri baseUri = new Uri(baseDir);
-            Uri otherUri = new Uri(otherDir);
-            return WebUtility.UrlDecode(baseUri.MakeRelativeUri(otherUri).ToString());
+            List<string> segments = new Uri(baseDir).MakeRelativeUri(new Uri(otherDir)).ToString().Split('/').ToList();
+            segments.RemoveAt(0);
+            return WebUtility.UrlDecode(string.Join("/", segments));
         }
 
         public static Season? ToSeason(string s) {
@@ -82,14 +81,14 @@ namespace TehPers.Stardew.Framework {
             return type == WaterType.BOTH ? -1 : (type == WaterType.RIVER ? 0 : 1);
         }
 
-        public static T As<T>(this object o, T fallback = default(T)) {
-            return (o is T) ? (T) o : fallback;
+        public static T As<T>(this object obj, T fallback = default(T)) {
+            return (obj is T ret) ? ret : fallback;
         }
 
         public static TVal GetDefault<TKey, TVal>(this Dictionary<TKey, TVal> dict, TKey key, TVal fallback = default(TVal)) {
             return dict.ContainsKey(key) ? dict[key] : fallback;
         }
-        
+
         public static T Choose<T>(this IEnumerable<KeyValuePair<T, double>> elements) {
             return Choose(elements, new Random());
         }
@@ -112,7 +111,7 @@ namespace TehPers.Stardew.Framework {
                 if (n < chance) return entry;
                 else n -= chance;
             }
-            throw new ArgumentException("Enumerable must contain entries", "entries");
+            throw new ArgumentException("Enumerable must contain entries", nameof(entries));
         }
 
         /// <summary>Defines a weighted chance for an object, allowing easy weighted choosing of a random element from a list of the object.</summary>
@@ -154,7 +153,7 @@ namespace TehPers.Stardew.Framework {
                 case LocalizedContentManager.LanguageCode.th:
                     return "th-TH";
             }
-            return "";
+            return string.Empty;
         }
     }
 }
