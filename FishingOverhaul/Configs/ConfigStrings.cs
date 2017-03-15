@@ -14,6 +14,7 @@ namespace TehPers.Stardew.FishingOverhaul.Configs {
         public string NoPossibleFish { get; set; } = "You can't catch any fish there right now!";
 
         public string LostStreak { get; set; } = "You lost your perfect fishing streak of {0}.";
+        public string LostSomeStreak { get; set; } = "Your perfect fishing streak has dropped to {0}.";
         public string WarnStreak { get; set; } = "Catch the treasure and the fish to keep your streak of {0}!";
         public string KeptStreak { get; set; } = "You kept your perfect fishing streak!";
     }

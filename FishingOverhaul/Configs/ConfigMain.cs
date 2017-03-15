@@ -1,11 +1,6 @@
-﻿using Microsoft.Xna.Framework.Input;
-using StardewModdingAPI.Advanced;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using TehPers.Stardew.Framework;
 
 namespace TehPers.Stardew.FishingOverhaul.Configs {
     public class ConfigMain {
@@ -21,6 +16,7 @@ namespace TehPers.Stardew.FishingOverhaul.Configs {
         public float TreasureCatchSpeed { get; set; } = 1.25f;
         public bool RecatchableLegendaries { get; set; } = false;
         public float TackleDestroyRate { get; set; } = 1.0f;
+        public int? PerfectLostPunishment { get; set; }
 
         public string GetFishInWaterKey { get; set; } = "NumPad9";
 
@@ -63,16 +59,13 @@ namespace TehPers.Stardew.FishingOverhaul.Configs {
         public int MaxTreasureQuantity { get; set; } = 3;
 
         // Getters for simplicity
-        internal ConfigTreasure.TreasureData[] PossibleLoot {
-            get {
-                return ModFishing.INSTANCE.treasureConfig.PossibleLoot;
-            }
-        }
+        internal ConfigTreasure.TreasureData[] PossibleLoot => ModFishing.Treasure.PossibleLoot;
+        internal Dictionary<string, Dictionary<int, ConfigFish.FishData>> PossibleFish => ModFishing.Fish.PossibleFish;
 
-        internal Dictionary<string, Dictionary<int, ConfigFish.FishData>> PossibleFish {
-            get {
-                return ModFishing.INSTANCE.fishConfig.PossibleFish;
-            }
+        // Reset default values
+        internal void PostLoad() {
+            this.AdditionalLootChance = (float) Math.Min(this.AdditionalLootChance, 0.99);
+            this.PerfectLostPunishment = this.PerfectLostPunishment ?? 20;
         }
     }
 }
