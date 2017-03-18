@@ -47,6 +47,7 @@
     <Compile Include="Configs\ConfigFish.cs" />
     <Compile Include="Configs\ConfigStrings.cs" />
     <Compile Include="Configs\ConfigTreasure.cs" />
+    <Compile Include="Configs\SaveFile.cs" />
     <Compile Include="CustomBobberBar.cs" />
     <Compile Include="FishHelper.cs" />
     <Compile Include="FishingRodOverrides.cs" />
