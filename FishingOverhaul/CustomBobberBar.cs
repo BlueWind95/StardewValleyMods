@@ -87,7 +87,7 @@ namespace TehPers.Stardew.FishingOverhaul {
             this.lastTreasureCatchLevel = this.treasureCatchLevelField.GetValue();
 
             this.User = user;
-            this.OriginalStreak = FishHelper.getStreak(user);
+            this.OriginalStreak = FishHelper.GetStreak(user);
             this.OriginalQuality = this.FishQuality;
 
             // Applies difficulty modifier, including if fish isn't paying attention
@@ -109,7 +109,6 @@ namespace TehPers.Stardew.FishingOverhaul {
             // Increase the user's perfect streak (this will be dropped to 0 if they don't get a perfect catch)
             if (this.OriginalStreak >= ModFishing.Config.StreakForIncreasedQuality)
                 this.sparkleTextField.SetValue(new SparklingText(Game1.dialogueFont, string.Format(ModFishing.Strings.StreakDisplay, this.OriginalStreak), Color.Yellow, Color.White, false, 0.1, 2500, -1, 500));
-            FishHelper.setStreak(user, this.OriginalStreak + 1);
         }
 
         private void HookPrivateFields() {
@@ -134,7 +133,7 @@ namespace TehPers.Stardew.FishingOverhaul {
 
         protected virtual void OnFishLost() {
             if (this.Treasure && this.OriginalStreak >= ModFishing.INSTANCE.config.StreakForIncreasedQuality) {
-                if (FishHelper.getStreak(this.User) == 0)
+                if (FishHelper.GetStreak(this.User) == 0)
                     Game1.showGlobalMessage(string.Format(ModFishing.Strings.LostStreak, this.OriginalStreak));
                 else
                     Game1.showGlobalMessage(string.Format(ModFishing.Strings.LostSomeStreak, this.OriginalStreak));
@@ -144,14 +143,18 @@ namespace TehPers.Stardew.FishingOverhaul {
         protected virtual void OnFishCaught() {
             // Keep the streak if they caught the treasure and fish but wasn't perfect
             if (!this.Perfect && this.treasureChanged) {
+                // Keep streak
                 if (this.OriginalStreak >= ModFishing.Config.StreakForIncreasedQuality)
                     Game1.showGlobalMessage(string.Format(ModFishing.Strings.KeptStreak, this.OriginalStreak));
-                FishHelper.setStreak(this.User, this.OriginalStreak);
+                FishHelper.SetStreak(this.User, this.OriginalStreak);
 
                 // If they're over treasure when they catch the fish, they should get the treasure
                 bool overTreasure = this.TreasurePosition + 16f <= this.BobberBarPosition - 32f + this.BobberBarHeight && this.TreasurePosition - 16f >= this.BobberBarPosition - 32f;
                 if (overTreasure && this.Perfect)
                     this.Treasure = true;
+            } else if (this.Perfect) {
+                // Increase streak
+                FishHelper.SetStreak(this.User, this.OriginalStreak + 1);
             }
         }
 
@@ -160,20 +163,19 @@ namespace TehPers.Stardew.FishingOverhaul {
             this.FishQuality = Math.Min(this.OriginalQuality, 1);
 
             // Lose streak
-            int streak = FishHelper.getStreak(this.User);
+            int streak = FishHelper.GetStreak(this.User);
             if (ModFishing.Config.PerfectLostPunishment.Value < 0) streak = 0;
             else streak = Math.Max(0, streak - ModFishing.Config.PerfectLostPunishment.Value);
-            FishHelper.setStreak(this.User, streak);
+            FishHelper.SetStreak(this.User, streak);
 
             // Display streak lost message
             if (this.OriginalStreak >= ModFishing.Config.StreakForIncreasedQuality) {
                 if (this.Treasure)
                     Game1.showGlobalMessage(string.Format(ModFishing.Strings.WarnStreak, this.OriginalStreak));
-                else if (FishHelper.getStreak(this.User) == 0)
+                else if (FishHelper.GetStreak(this.User) == 0)
                     Game1.showGlobalMessage(string.Format(ModFishing.Strings.LostStreak, this.OriginalStreak));
                 else
                     Game1.showGlobalMessage(string.Format(ModFishing.Strings.LostSomeStreak, this.OriginalStreak));
-
             }
         }
 

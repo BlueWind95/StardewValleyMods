@@ -8,8 +8,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using TehPers.Stardew.FishingOverhaul.Configs;
-using TehPers.Stardew.Framework;
 using static TehPers.Stardew.FishingOverhaul.Configs.ConfigTreasure;
+using TehPers.Stardew.Framework;
 using SFarmer = StardewValley.Farmer;
 
 namespace TehPers.Stardew.FishingOverhaul {
@@ -25,9 +25,7 @@ namespace TehPers.Stardew.FishingOverhaul {
 
         private static Dictionary<SFarmer, int> clearWaterDistances = new Dictionary<SFarmer, int>();
 
-#pragma warning disable IDE1006 // Naming Styles
-        public static void startMinigameEndFunction(FishingRod rod, int extra) {
-#pragma warning restore IDE1006 // Naming Styles
+        public static void StartMinigameEndFunction(FishingRod rod, int extra) {
             ModFishing.INSTANCE.Monitor.Log("Overriding fishing minigame", LogLevel.Trace);
             ConfigMain config = ModFishing.INSTANCE.config;
             SFarmer lastUser = ModFishing.INSTANCE.Helper.Reflection.GetPrivateValue<SFarmer>(rod, "lastUser");
@@ -53,17 +51,17 @@ namespace TehPers.Stardew.FishingOverhaul {
             float fishSize = Math.Max(0.0f, Math.Min(1f, num * (float) (1.0 + Game1.random.Next(-10, 10) / 100.0)));
             bool treasure = false;
 
-            double treasureChance = config.TreasureChance + lastUser.LuckLevel * config.TreasureLuckLevelEffect + (rod.getBaitAttachmentIndex() == 703 ? config.TreasureBaitEffect : 0.0) + (rod.getBobberAttachmentIndex() == 693 ? config.TreasureBobberEffect : 0.0) + Game1.dailyLuck * config.TreasureDailyLuckEffect + (lastUser.professions.Contains(9) ? config.TreasureChance : 0.0) + config.TreasureStreakEffect * FishHelper.getStreak(lastUser);
+            double treasureChance = config.TreasureChance + lastUser.LuckLevel * config.TreasureLuckLevelEffect + (rod.getBaitAttachmentIndex() == 703 ? config.TreasureBaitEffect : 0.0) + (rod.getBobberAttachmentIndex() == 693 ? config.TreasureBobberEffect : 0.0) + Game1.dailyLuck * config.TreasureDailyLuckEffect + (lastUser.professions.Contains(9) ? config.TreasureChance : 0.0) + config.TreasureStreakEffect * FishHelper.GetStreak(lastUser);
             treasureChance = Math.Min(treasureChance, config.MaxTreasureChance);
             if (!Game1.isFestival() && lastUser.fishCaught != null && lastUser.fishCaught.Count > 1 && Game1.random.NextDouble() < treasureChance)
                 treasure = true;
 
             // Override caught fish
-            bool legendary = FishHelper.isLegendary(extra);
+            bool legendary = FishHelper.IsLegendary(extra);
             if ((!legendary && !config.UseVanillaFish) || (legendary && config.OverrideLegendaries)) {
                 int origExtra = extra;
-                extra = FishHelper.getRandomFish(clearWaterDistance);
-                if (FishHelper.isTrash(extra)) {
+                extra = FishHelper.GetRandomFish(clearWaterDistance);
+                if (FishHelper.IsTrash(extra)) {
                     if (false) { // TODO: Replace this with code relating to a config option that determines the chance you'll get fish/trash
 #pragma warning disable CS0162 // Unreachable code detected
                         Game1.showGlobalMessage("No valid fish to catch! Giving junk instead.");
@@ -82,9 +80,7 @@ namespace TehPers.Stardew.FishingOverhaul {
             Game1.activeClickableMenu = new CustomBobberBar(lastUser, extra, fishSize, treasure, rod.attachments[1] != null ? rod.attachments[1].ParentSheetIndex : -1, clearWaterDistance);
         }
 
-#pragma warning disable IDE1006 // Naming Styles
-        public static void openTreasureMenuEndFunction(FishingRod rod, int extra) {
-#pragma warning restore IDE1006 // Naming Styles
+        public static void OpenTreasureMenuEndFunction(FishingRod rod, int extra) {
             ModFishing.INSTANCE.Monitor.Log("Successfully replaced treasure", LogLevel.Trace);
 
             ConfigMain config = ModFishing.INSTANCE.config;
@@ -107,13 +103,21 @@ namespace TehPers.Stardew.FishingOverhaul {
             List<Item> rewards = new List<Item>();
             if (extra == 1) rewards.Add(new StardewValley.Object(whichFish, 1, false, -1, fishQuality));
 
-            List<TreasureData> possibleLoot = new List<ConfigTreasure.TreasureData>(config.PossibleLoot)
-                .Where(treasure => treasure.isValid(lastUser.FishingLevel, clearWaterDistance)).ToList();
+            // Quality multiplier
+            double qualityMult = 1;
+
+            // Modified loot table
+            List<KeyValuePair<TreasureData, double>> possibleLoot = config.PossibleLoot
+                .Where(treasure => treasure.isValid(lastUser.FishingLevel, clearWaterDistance))
+                .Select(treasure => new KeyValuePair<TreasureData, double>(treasure, GetModifiedChance(treasure.chance, qualityMult)))
+                .ToList();
+
+            // Modify chances of rewards depending on the 
 
             // Select rewards
             float chance = 1f;
-            int streak = FishHelper.getStreak(lastUser);
-            while (possibleLoot.Count > 0 && rewards.Count < config.MaxTreasureQuantity && Game1.random.NextDouble() <= chance) {
+            int streak = FishHelper.GetStreak(lastUser);
+            while (possibleLoot.Any() && rewards.Count < config.MaxTreasureQuantity && Game1.random.NextDouble() <= chance) {
                 TreasureData treasure = possibleLoot.Choose(Game1.random);
 
                 int id = treasure.id + Game1.random.Next(treasure.idRange - 1);
@@ -139,7 +143,7 @@ namespace TehPers.Stardew.FishingOverhaul {
 
                 rewards.Add(reward);
                 if (!config.AllowDuplicateLoot || !treasure.allowDuplicates)
-                    possibleLoot.Remove(treasure);
+                    possibleLoot = possibleLoot.Where(kv => kv.Key != treasure).ToList();
 
                 //rewards.Add(new StardewValley.Object(Vector2.Zero, Objects.BAIT, Game1.random.Next(10, 25)));
             }
@@ -154,6 +158,16 @@ namespace TehPers.Stardew.FishingOverhaul {
             Game1.activeClickableMenu = new ItemGrabMenu(rewards);
             (Game1.activeClickableMenu as ItemGrabMenu).source = 3;
             lastUser.completelyStopAnimatingOrDoingAction();
+
+            // General idea is this: modified chance = x + c(1 - x), which approaches 1 as c approaches 1.
+            // c = (m - 1) / m, which approaches 1 as m approaches infinity, and 0 as m approaches 1.
+            // if m = 1, then modified chance = x + 0(1 - x) = x.
+            double GetModifiedChance(double x, double m)
+            {
+                if (x < 0 || x > 1) throw new ArgumentOutOfRangeException($"{nameof(x)} must be between 0 and 1, inclusive", nameof(x));
+                if (m < 1) throw new ArgumentOutOfRangeException($"{nameof(m)} must be at least 1", nameof(m));
+                return x + ((m - 1) / m) * (1 - x);
+            }
         }
     }
 }

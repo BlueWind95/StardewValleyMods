@@ -70,7 +70,7 @@ namespace TehPers.Stardew.FishingOverhaul {
         private void UpdateTick(object sender, EventArgs e) {
             // Auto-populate the fish config file if it's empty
             if (this.fishConfig.PossibleFish == null) {
-                this.fishConfig.populateData();
+                this.fishConfig.PopulateData();
                 this.Helper.WriteJsonFile("fish.json", this.fishConfig);
             }
 
@@ -103,9 +103,9 @@ namespace TehPers.Stardew.FishingOverhaul {
                 if (Game1.currentLocation != null) {
                     int[] possibleFish;
                     if (Game1.currentLocation is MineShaft)
-                        possibleFish = FishHelper.getPossibleFish(5, (Game1.currentLocation as MineShaft).mineLevel).Select(f => f.Key).ToArray();
+                        possibleFish = FishHelper.GetPossibleFish(5, (Game1.currentLocation as MineShaft).mineLevel).Select(f => f.Key).ToArray();
                     else
-                        possibleFish = FishHelper.getPossibleFish(5, -1).Select(f => f.Key).ToArray();
+                        possibleFish = FishHelper.GetPossibleFish(5, -1).Select(f => f.Key).ToArray();
                     Dictionary<int, string> fish = Game1.content.Load<Dictionary<int, string>>("Data\\Fish");
                     string[] fishByName = (
                         from id in possibleFish
@@ -127,13 +127,13 @@ namespace TehPers.Stardew.FishingOverhaul {
         }
 
         private void BeforeSave(object sender, EventArgs e) {
-            this.save.FishingStreak = FishHelper.getStreak(Game1.player);
+            this.save.FishingStreak = FishHelper.GetStreak(Game1.player);
             this.Helper.WriteJsonFile<SaveFile>($"{Constants.SaveFolderName}/FishingOverhaul.json", this.save);
         }
 
         private void AfterLoad(object sender, EventArgs e) {
             this.save = this.Helper.ReadJsonFile<SaveFile>($"{Constants.SaveFolderName}/FishingOverhaul.json") ?? new SaveFile();
-            FishHelper.setStreak(Game1.player, save.FishingStreak);
+            FishHelper.SetStreak(Game1.player, save.FishingStreak);
         }
         #endregion
 
@@ -144,7 +144,7 @@ namespace TehPers.Stardew.FishingOverhaul {
                     foreach (TemporaryAnimatedSprite anim in Game1.screenOverlayTempSprites) {
                         if (anim.endFunction == rod.startMinigameEndFunction) {
                             this.Monitor.Log("Overriding bobber bar", LogLevel.Trace);
-                            anim.endFunction = (i => FishingRodOverrides.startMinigameEndFunction(rod, i));
+                            anim.endFunction = (i => FishingRodOverrides.StartMinigameEndFunction(rod, i));
                         }
                     }
                 }
@@ -154,7 +154,7 @@ namespace TehPers.Stardew.FishingOverhaul {
                     foreach (TemporaryAnimatedSprite anim in rod.animations) {
                         if (anim.endFunction == rod.openTreasureMenuEndFunction) {
                             this.Monitor.Log("Overriding treasure animation end function", LogLevel.Trace);
-                            anim.endFunction = (i => FishingRodOverrides.openTreasureMenuEndFunction(rod, i));
+                            anim.endFunction = (i => FishingRodOverrides.OpenTreasureMenuEndFunction(rod, i));
                         }
                     }
                 }
