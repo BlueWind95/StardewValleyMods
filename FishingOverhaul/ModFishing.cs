@@ -1,4 +1,5 @@
-﻿using Microsoft.Xna.Framework.Input;
+﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Input;
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
 using StardewValley;
@@ -7,9 +8,12 @@ using StardewValley.Tools;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using TehPers.Stardew.FishingOverhaul.Configs;
 using TehPers.Stardew.Framework;
 using SObject = StardewValley.Object;
+using SFarmer = StardewValley.Farmer;
+using static TehPers.Stardew.FishingOverhaul.MethodReplacer;
 
 namespace TehPers.Stardew.FishingOverhaul {
     /// <summary>The mod entry point.</summary>
@@ -64,6 +68,23 @@ namespace TehPers.Stardew.FishingOverhaul {
             LocalizedContentManager.OnLanguageChange += OnLanguageChange;
             SaveEvents.BeforeSave += BeforeSave;
             SaveEvents.AfterLoad += AfterLoad;
+
+            // Testing: Replace method
+            originalGetColor = MethodReplacer.Replace(fishingRodColor, replaceRodColor);
+        }
+
+        public MethodBodyPtr fishingRodColor = new MethodBodyPtr(typeof(FishingRod).GetMethod(nameof(FishingRod.DoFunction), BindingFlags.Public | BindingFlags.Instance));
+        public MethodBodyPtr replaceRodColor = new MethodBodyPtr(typeof(ModFishing).GetMethod(nameof(OverriddenGetColor), BindingFlags.Public | BindingFlags.Instance));
+        public int originalGetColor;
+        public void OverriddenGetColor(GameLocation location, int x, int y, int power, SFarmer who) {
+            ModFishing self = ModFishing.INSTANCE;
+            FishingRod rod = this as object as FishingRod;
+
+            MethodReplacer.Replace(self.fishingRodColor, self.originalGetColor);
+            rod.DoFunction(location, x, y, power, who);
+            MethodReplacer.Replace(self.fishingRodColor, self.replaceRodColor);
+
+            return;
         }
 
         #region Events
