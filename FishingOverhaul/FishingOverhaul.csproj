@@ -52,8 +52,15 @@
     <Compile Include="FishHelper.cs" />
     <Compile Include="FishingRodOverrides.cs" />
     <Compile Include="Configs\ConfigMain.cs" />
+    <Compile Include="Items\ModRod.cs" />
+    <Compile Include="MethodReplacer.cs" />
     <Compile Include="ModFishing.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SCCL\ISavable.cs" />
+    <Compile Include="SCCL\ItemData.cs" />
+    <Compile Include="SCCL\ItemLoader.cs" />
+    <Compile Include="SCCL\ItemTemplate.cs" />
+    <Compile Include="SCCL\ModObject.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="manifest.json" />

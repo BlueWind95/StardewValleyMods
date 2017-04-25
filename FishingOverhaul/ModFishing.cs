@@ -10,6 +10,10 @@ using System.Linq;
 using TehPers.Stardew.FishingOverhaul.Configs;
 using TehPers.Stardew.Framework;
 using SObject = StardewValley.Object;
+using SFarmer = StardewValley.Farmer;
+using static TehPers.Stardew.FishingOverhaul.MethodReplacer;
+using TehPers.Stardew.SCCL.Items;
+using TehPers.Stardew.FishingOverhaul.Items;
 
 namespace TehPers.Stardew.FishingOverhaul {
     /// <summary>The mod entry point.</summary>
@@ -25,12 +29,14 @@ namespace TehPers.Stardew.FishingOverhaul {
         public static SaveFile Save => INSTANCE.save;
         public static IModHelper ModHelper => INSTANCE.Helper;
         public static IReflectionHelper Reflection => ModHelper.Reflection;
+        public static IMonitor Logger => INSTANCE.Monitor;
 
         public ConfigMain config;
         public ConfigTreasure treasureConfig;
         public ConfigFish fishConfig;
         public ConfigStrings strings;
         public SaveFile save;
+        internal ItemLoader loader;
 
         private Dictionary<SObject, float> lastDurability = new Dictionary<SObject, float>();
 
@@ -57,6 +63,9 @@ namespace TehPers.Stardew.FishingOverhaul {
 
             // Stop here if the mod is disabled
             if (!this.config.ModEnabled) return;
+
+            // Create item loader
+            this.loader = new ItemLoader();
 
             // Events
             GameEvents.UpdateTick += UpdateTick;
@@ -96,6 +105,8 @@ namespace TehPers.Stardew.FishingOverhaul {
                     } else this.lastDurability[bobber] = bobber.scale.Y;
                 }
             }
+
+            //loader.ForEach(item => item is FishingRod && !(item is ModRod), item => new ModRod(new ItemTemplate("fishingRod")));
         }
 
         private void KeyPressed(object sender, EventArgsKeyPressed e) {
