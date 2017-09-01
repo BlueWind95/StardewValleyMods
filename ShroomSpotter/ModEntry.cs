@@ -54,66 +54,71 @@ namespace TehPers.Stardew.ShroomSpotter {
         }
 
         private void OnPreRenderGuiEvent(object sender, EventArgs e) {
-            if (Game1.activeClickableMenu is Billboard) {
-                Billboard menu = (Billboard) Game1.activeClickableMenu;
-                FieldInfo calendarField = menu.GetType().GetField("calendarDays", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
-                if (calendarField == null) {
-                    this.Monitor.Log("Could not find field 'calendarDays' in Billboard!", LogLevel.Error);
-                    return;
-                }
-                List<ClickableTextureComponent> calendarDays = (List<ClickableTextureComponent>) calendarField.GetValue(menu);
-                IPrivateField<string> hoverField = this.Helper.Reflection.GetPrivateField<string>(menu, "hoverText");
-                string hoverText = hoverField.GetValue();
-                if (calendarDays != null && !(hoverText.Contains("Shrooms") || hoverText.Contains("shrooms"))) {
-                    for (int day = 1; day <= 28; day++) {
-                        ClickableTextureComponent component = calendarDays[day - 1];
-                        if (component.bounds.Contains(Game1.getMouseX(), Game1.getMouseY())) {
-                            List<int> shrooms = this.getShroomLayers(day - Game1.dayOfMonth);
+            if (!(Game1.activeClickableMenu is Billboard))
+                return;
 
-                            if (hoverText.Length > 0)
-                                hoverText += "\n";
-
-                            if (shrooms.Count > 0)
-                                hoverText += "Shrooms: " + string.Join(", ", shrooms);
-                            else
-                                hoverText += "No shrooms";
-
-                            break;
-                        }
-                    }
-
-                    hoverField.SetValue(hoverText);
-                }
+            Billboard menu = (Billboard) Game1.activeClickableMenu;
+            FieldInfo calendarField = menu.GetType().GetField("calendarDays", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+            if (calendarField == null) {
+                this.Monitor.Log("Could not find field 'calendarDays' in Billboard!", LogLevel.Error);
+                return;
             }
+
+            List<ClickableTextureComponent> calendarDays = (List<ClickableTextureComponent>) calendarField.GetValue(menu);
+            IPrivateField<string> hoverField = this.Helper.Reflection.GetPrivateField<string>(menu, "hoverText");
+            string hoverText = hoverField.GetValue();
+            if (calendarDays == null || (hoverText.Contains("Shrooms") || hoverText.Contains("shrooms")))
+                return;
+
+            for (int day = 1; day <= 28; day++) {
+                ClickableTextureComponent component = calendarDays[day - 1];
+                if (!component.bounds.Contains(Game1.getMouseX(), Game1.getMouseY()))
+                    continue;
+
+                List<int> shrooms = this.getShroomLayers(day - Game1.dayOfMonth);
+
+                if (hoverText.Length > 0)
+                    hoverText += "\n";
+
+                if (shrooms.Count > 0)
+                    hoverText += "Shrooms: " + string.Join(", ", shrooms);
+                else
+                    hoverText += "No shrooms";
+
+                break;
+            }
+
+            hoverField.SetValue(hoverText);
         }
 
         private void OnPostRenderGuiEvent(object sender, EventArgs e) {
-            if (Game1.activeClickableMenu is Billboard) {
-                Billboard menu = (Billboard) Game1.activeClickableMenu;
-                FieldInfo calendarField = menu.GetType().GetField("calendarDays", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
-                if (calendarField == null) {
-                    this.Monitor.Log("Could not find field 'calendarDays' in Billboard!", LogLevel.Error);
-                    return;
-                }
-                List<ClickableTextureComponent> calendarDays = (List<ClickableTextureComponent>) calendarField.GetValue(menu);
-                if (calendarDays == null) return;
-                string hoverText = this.Helper.Reflection.GetPrivateValue<string>(menu, "hoverText");
-                SpriteBatch b = Game1.spriteBatch;
+            if (!(Game1.activeClickableMenu is Billboard menu))
+                return;
 
-                for (int day = 1; day <= 28; day++) {
-                    ClickableTextureComponent component = calendarDays[day - 1];
-                    List<int> shrooms = this.getShroomLayers(day - Game1.dayOfMonth);
-
-                    if (shrooms.Count > 0) {
-                        const int id = 422;
-                        Rectangle source = Game1.currentLocation.getSourceRectForObject(id);
-                        Vector2 dest = new Vector2(component.bounds.X, component.bounds.Y + 10f * Game1.pixelZoom);
-                        b.Draw(Game1.objectSpriteSheet, dest, new Rectangle?(source), Color.White, 0.0f, Vector2.Zero, Game1.pixelZoom / 2f, SpriteEffects.None, 1f);
-                    }
-                }
-
-                IClickableMenu.drawHoverText(b, hoverText, Game1.dialogueFont, 0, 0, -1, null, -1, null, null, 0, -1, -1, -1, -1, 1f, null);
+            FieldInfo calendarField = menu.GetType().GetField("calendarDays", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+            if (calendarField == null) {
+                this.Monitor.Log("Could not find field 'calendarDays' in Billboard!", LogLevel.Error);
+                return;
             }
+
+            List<ClickableTextureComponent> calendarDays = (List<ClickableTextureComponent>) calendarField.GetValue(menu);
+            if (calendarDays == null) return;
+            string hoverText = this.Helper.Reflection.GetPrivateValue<string>(menu, "hoverText");
+            SpriteBatch b = Game1.spriteBatch;
+
+            for (int day = 1; day <= 28; day++) {
+                ClickableTextureComponent component = calendarDays[day - 1];
+                List<int> shrooms = this.getShroomLayers(day - Game1.dayOfMonth);
+
+                if (shrooms.Count > 0) {
+                    const int id = 422;
+                    Rectangle source = Game1.currentLocation.getSourceRectForObject(id);
+                    Vector2 dest = new Vector2(component.bounds.X, component.bounds.Y + 10f * Game1.pixelZoom);
+                    b.Draw(Game1.objectSpriteSheet, dest, new Rectangle?(source), Color.White, 0.0f, Vector2.Zero, Game1.pixelZoom / 2f, SpriteEffects.None, 1f);
+                }
+            }
+
+            IClickableMenu.drawHoverText(b, hoverText, Game1.dialogueFont);
         }
         #endregion
 

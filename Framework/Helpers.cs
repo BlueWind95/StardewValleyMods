@@ -95,9 +95,8 @@ namespace TehPers.Stardew.Framework {
         }
 
         public static T Choose<T>(this IEnumerable<KeyValuePair<T, double>> elements, Random rand) {
-            WeightedAuto<T> choice = Choose(elements.Select(kv => new WeightedAuto<T>(kv.Key, kv.Value)), rand);
-            if (choice == null) return default(T);
-            return choice.Element;
+            WeightedAuto<T> choice = elements.Select(kv => new WeightedAuto<T>(kv.Key, kv.Value)).Choose(rand);
+            return choice == null ? default(T) : choice.Element;
         }
 
         public static T Choose<T>(this IEnumerable<T> entries) where T : IWeighted {

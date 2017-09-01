@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace TehPers.Stardew.Framework {
+    [Flags]
     public enum WaterType : int {
         /** <summary>Game ID is 1</summary> **/
         LAKE = 1,
@@ -13,31 +14,33 @@ namespace TehPers.Stardew.Framework {
         RIVER = 2,
 
         /** <summary>Game ID is -1</summary> **/
-        BOTH = LAKE | RIVER
+        BOTH = WaterType.LAKE | WaterType.RIVER
     }
 
+    [Flags]
     public enum Weather : int {
         SUNNY = 1,
         RAINY = 2,
-        BOTH = SUNNY | RAINY
+        BOTH = Weather.SUNNY | Weather.RAINY
     }
 
+    [Flags]
     public enum Season : int {
         SPRING = 1,
         SUMMER = 2,
         FALL = 4,
         WINTER = 8,
 
-        SPRINGSUMMER = SPRING | SUMMER,
-        SPRINGFALL = SPRING | FALL,
-        SUMMERFALL = SUMMER | FALL,
-        SPRINGSUMMERFALL = SPRING | SUMMER | FALL,
-        SPRINGWINTER = SPRING | WINTER,
-        SUMMERWINTER = SUMMER | WINTER,
-        SPRINGSUMMERWINTER = SPRING | SUMMER | WINTER,
-        FALLWINTER = FALL | WINTER,
-        SPRINGFALLWINTER = SPRING | FALL | WINTER,
-        SUMMERFALLWINTER = SUMMER | FALL | WINTER,
-        SPRINGSUMMERFALLWINTER = SPRING | SUMMER | FALL | WINTER
+        SPRINGSUMMER = Season.SPRING | Season.SUMMER,
+        SPRINGFALL = Season.SPRING | Season.FALL,
+        SUMMERFALL = Season.SUMMER | Season.FALL,
+        SPRINGSUMMERFALL = Season.SPRING | Season.SUMMER | Season.FALL,
+        SPRINGWINTER = Season.SPRING | Season.WINTER,
+        SUMMERWINTER = Season.SUMMER | Season.WINTER,
+        SPRINGSUMMERWINTER = Season.SPRING | Season.SUMMER | Season.WINTER,
+        FALLWINTER = Season.FALL | Season.WINTER,
+        SPRINGFALLWINTER = Season.SPRING | Season.FALL | Season.WINTER,
+        SUMMERFALLWINTER = Season.SUMMER | Season.FALL | Season.WINTER,
+        SPRINGSUMMERFALLWINTER = Season.SPRING | Season.SUMMER | Season.FALL | Season.WINTER
     }
 }

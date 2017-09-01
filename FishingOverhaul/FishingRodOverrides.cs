@@ -23,56 +23,57 @@ namespace TehPers.Stardew.FishingOverhaul {
         // - Treasure quality is increased as your streak increases, but still obviously random
         // - Treasure is more likely to appear as your streak increases
 
-        private static Dictionary<SFarmer, int> clearWaterDistances = new Dictionary<SFarmer, int>();
+        private static readonly Dictionary<SFarmer, int> ClearWaterDistances = new Dictionary<SFarmer, int>();
 
 #pragma warning disable IDE1006 // Naming Styles
+        // ReSharper disable once InconsistentNaming
         public static void startMinigameEndFunction(FishingRod rod, int extra) {
 #pragma warning restore IDE1006 // Naming Styles
-            ModFishing.INSTANCE.Monitor.Log("Overriding fishing minigame", LogLevel.Trace);
-            ConfigMain config = ModFishing.INSTANCE.config;
-            SFarmer lastUser = ModFishing.INSTANCE.Helper.Reflection.GetPrivateValue<SFarmer>(rod, "lastUser");
-            int clearWaterDistance = ModFishing.INSTANCE.Helper.Reflection.GetPrivateValue<int>(rod, "clearWaterDistance");
-            Vector2 bobber = ModFishing.INSTANCE.Helper.Reflection.GetPrivateValue<Vector2>(rod, "bobber");
+            ModFishing.Instance.Monitor.Log("Overriding fishing minigame", LogLevel.Trace);
+            ConfigMain config = ModFishing.Instance.Config;
+            SFarmer lastUser = ModFishing.Instance.Helper.Reflection.GetPrivateValue<SFarmer>(rod, "lastUser");
+            int clearWaterDistance = ModFishing.Instance.Helper.Reflection.GetPrivateValue<int>(rod, "clearWaterDistance");
+            Vector2 bobber = ModFishing.Instance.Helper.Reflection.GetPrivateValue<Vector2>(rod, "bobber");
 
             rod.isReeling = true;
             rod.hit = false;
             switch (lastUser.FacingDirection) {
                 case 1:
-                    lastUser.FarmerSprite.setCurrentSingleFrame(48, 32000, false, false);
+                    lastUser.FarmerSprite.setCurrentSingleFrame(48);
                     break;
                 case 3:
-                    lastUser.FarmerSprite.setCurrentSingleFrame(48, 32000, false, true);
+                    lastUser.FarmerSprite.setCurrentSingleFrame(48, flip: true);
                     break;
             }
             lastUser.FarmerSprite.pauseForSingleAnimation = true;
             clearWaterDistance = FishingRod.distanceToLand((int) (bobber.X / (double) Game1.tileSize - 1.0), (int) (bobber.Y / (double) Game1.tileSize - 1.0), lastUser.currentLocation);
-            clearWaterDistances[lastUser] = clearWaterDistance;
+            FishingRodOverrides.ClearWaterDistances[lastUser] = clearWaterDistance;
             float num = 1f * (clearWaterDistance / 5f) * (Game1.random.Next(1 + Math.Min(10, lastUser.FishingLevel) / 2, 6) / 5f);
             if (rod.favBait)
                 num *= 1.2f;
             float fishSize = Math.Max(0.0f, Math.Min(1f, num * (float) (1.0 + Game1.random.Next(-10, 10) / 100.0)));
             bool treasure = false;
 
-            double treasureChance = config.TreasureChance + lastUser.LuckLevel * config.TreasureLuckLevelEffect + (rod.getBaitAttachmentIndex() == 703 ? config.TreasureBaitEffect : 0.0) + (rod.getBobberAttachmentIndex() == 693 ? config.TreasureBobberEffect : 0.0) + Game1.dailyLuck * config.TreasureDailyLuckEffect + (lastUser.professions.Contains(9) ? config.TreasureChance : 0.0) + config.TreasureStreakEffect * FishHelper.getStreak(lastUser);
+            double treasureChance = config.TreasureChance + lastUser.LuckLevel * config.TreasureLuckLevelEffect + (rod.getBaitAttachmentIndex() == 703 ? config.TreasureBaitEffect : 0.0) + (rod.getBobberAttachmentIndex() == 693 ? config.TreasureBobberEffect : 0.0) + Game1.dailyLuck * config.TreasureDailyLuckEffect + (lastUser.professions.Contains(9) ? config.TreasureChance : 0.0) + config.TreasureStreakEffect * FishHelper.GetStreak(lastUser);
             treasureChance = Math.Min(treasureChance, config.MaxTreasureChance);
             if (!Game1.isFestival() && lastUser.fishCaught != null && lastUser.fishCaught.Count > 1 && Game1.random.NextDouble() < treasureChance)
                 treasure = true;
 
             // Override caught fish
-            bool legendary = FishHelper.isLegendary(extra);
-            if ((!legendary && !config.UseVanillaFish) || (legendary && config.OverrideLegendaries)) {
+            bool legendary = FishHelper.IsLegendary(extra);
+            if (!config.UseVanillaFish && (!legendary || !config.VanillaLegendaries)) {
                 int origExtra = extra;
-                extra = FishHelper.getRandomFish(clearWaterDistance);
-                if (FishHelper.isTrash(extra)) {
+                extra = FishHelper.GetRandomFish(clearWaterDistance);
+                if (FishHelper.IsTrash(extra)) {
                     if (false) { // TODO: Replace this with code relating to a config option that determines the chance you'll get fish/trash
 #pragma warning disable CS0162 // Unreachable code detected
                         Game1.showGlobalMessage("No valid fish to catch! Giving junk instead.");
-                        StardewValley.Object o = new StardewValley.Object(extra, 1, false, -1, 0);
-                        rod.pullFishFromWater(extra, -1, 0, 0, false, false);
+                        StardewValley.Object o = new StardewValley.Object(extra, 1);
+                        rod.pullFishFromWater(extra, -1, 0, 0, false);
                         return;
 #pragma warning restore CS0162 // Unreachable code detected
                     } else {
-                        ModFishing.INSTANCE.Monitor.Log("No valid fish to catch! Using original fish instead.", LogLevel.Warn);
+                        ModFishing.Instance.Monitor.Log("No valid fish to catch! Using original fish instead.", LogLevel.Warn);
                         extra = origExtra;
                     }
                 }
@@ -83,21 +84,22 @@ namespace TehPers.Stardew.FishingOverhaul {
         }
 
 #pragma warning disable IDE1006 // Naming Styles
+        // ReSharper disable once InconsistentNaming
         public static void openTreasureMenuEndFunction(FishingRod rod, int extra) {
 #pragma warning restore IDE1006 // Naming Styles
-            ModFishing.INSTANCE.Monitor.Log("Successfully replaced treasure", LogLevel.Trace);
+            ModFishing.Instance.Monitor.Log("Successfully replaced treasure", LogLevel.Trace);
 
-            ConfigMain config = ModFishing.INSTANCE.config;
-            SFarmer lastUser = ModFishing.INSTANCE.Helper.Reflection.GetPrivateValue<SFarmer>(rod, "lastUser");
+            ConfigMain config = ModFishing.Instance.Config;
+            SFarmer lastUser = ModFishing.Instance.Helper.Reflection.GetPrivateValue<SFarmer>(rod, "lastUser");
             int clearWaterDistance = 5;
             if (config.OverrideFishing) {
-                if (clearWaterDistances.ContainsKey(lastUser))
-                    clearWaterDistance = clearWaterDistances[lastUser];
+                if (FishingRodOverrides.ClearWaterDistances.ContainsKey(lastUser))
+                    clearWaterDistance = FishingRodOverrides.ClearWaterDistances[lastUser];
                 else
-                    ModFishing.INSTANCE.Monitor.Log("The bobber bar was not replaced. Fishing might not be overridden by this mod", LogLevel.Warn);
+                    ModFishing.Instance.Monitor.Log("The bobber bar was not replaced. Fishing might not be overridden by this mod", LogLevel.Warn);
             }
-            int whichFish = ModFishing.INSTANCE.Helper.Reflection.GetPrivateValue<int>(rod, "whichFish");
-            int fishQuality = ModFishing.INSTANCE.Helper.Reflection.GetPrivateValue<int>(rod, "fishQuality");
+            int whichFish = ModFishing.Instance.Helper.Reflection.GetPrivateValue<int>(rod, "whichFish");
+            int fishQuality = ModFishing.Instance.Helper.Reflection.GetPrivateValue<int>(rod, "fishQuality");
 
             lastUser.gainExperience(5, 10 * (clearWaterDistance + 1));
             rod.doneFishing(lastUser, true);
@@ -112,7 +114,7 @@ namespace TehPers.Stardew.FishingOverhaul {
 
             // Select rewards
             float chance = 1f;
-            int streak = FishHelper.getStreak(lastUser);
+            int streak = FishHelper.GetStreak(lastUser);
             while (possibleLoot.Count > 0 && rewards.Count < config.MaxTreasureQuantity && Game1.random.NextDouble() <= chance) {
                 TreasureData treasure = possibleLoot.Choose(Game1.random);
 
@@ -146,8 +148,8 @@ namespace TehPers.Stardew.FishingOverhaul {
 
             // Add bait if no rewards were selected. NOTE: This should never happen
             if (rewards.Count == 0) {
-                ModFishing.INSTANCE.Monitor.Log("Could not find any valid loot for the treasure chest. Check your treasure.json?", LogLevel.Warn);
-                rewards.Add(new StardewValley.Object(685, Game1.random.Next(2, 5) * 5, false, -1, 0));
+                ModFishing.Instance.Monitor.Log("Could not find any valid loot for the treasure chest. Check your treasure.json?", LogLevel.Warn);
+                rewards.Add(new StardewValley.Object(685, Game1.random.Next(2, 5) * 5));
             }
 
             // Show rewards GUI

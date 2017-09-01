@@ -81,13 +81,6 @@
   <Target Name="AfterBuild">
   </Target>
   -->
-  <Import Project="..\packages\Pathoschild.Stardew.ModBuildConfig.1.5.0\build\Pathoschild.Stardew.ModBuildConfig.targets" Condition="Exists('..\packages\Pathoschild.Stardew.ModBuildConfig.1.5.0\build\Pathoschild.Stardew.ModBuildConfig.targets')" />
-  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
-    <PropertyGroup>
-      <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
-    </PropertyGroup>
-    <Error Condition="!Exists('..\packages\Pathoschild.Stardew.ModBuildConfig.1.5.0\build\Pathoschild.Stardew.ModBuildConfig.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Pathoschild.Stardew.ModBuildConfig.1.5.0\build\Pathoschild.Stardew.ModBuildConfig.targets'))" />
-  </Target>
   <Target Name="AfterBuild">
     <PropertyGroup>
       <ModPath>$(GamePath)\Mods\$(TargetName)</ModPath>
@@ -112,5 +105,12 @@
     <Copy SourceFiles="@(Translations)" DestinationFolder="$(ModPath)\Translations" />
     <Copy SourceFiles="@(README)" DestinationFolder="$(ModPath)\README" />
     <!-- README - Config Files.txt -->
+  </Target>
+  <Import Project="..\packages\Pathoschild.Stardew.ModBuildConfig.1.7.1\build\Pathoschild.Stardew.ModBuildConfig.targets" Condition="Exists('..\packages\Pathoschild.Stardew.ModBuildConfig.1.7.1\build\Pathoschild.Stardew.ModBuildConfig.targets')" />
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('..\packages\Pathoschild.Stardew.ModBuildConfig.1.7.1\build\Pathoschild.Stardew.ModBuildConfig.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Pathoschild.Stardew.ModBuildConfig.1.7.1\build\Pathoschild.Stardew.ModBuildConfig.targets'))" />
   </Target>
 </Project>

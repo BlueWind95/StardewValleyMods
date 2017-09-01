@@ -10,18 +10,18 @@ namespace TehPers.Stardew.FishingOverhaul.Configs {
 
         public Dictionary<string, Dictionary<int, FishData>> PossibleFish { get; set; }
 
-        public void populateData() {
-            ModFishing.INSTANCE.Monitor.Log("Automatically populating fish.json with data from Fish.xnb and Locations.xnb", StardewModdingAPI.LogLevel.Info);
-            ModFishing.INSTANCE.Monitor.Log("NOTE: If either of these files are modded, the config will reflect the changes! However, legendary fish and fish in the UndergroundMine are not being pulled from those files due to technical reasons.", StardewModdingAPI.LogLevel.Info);
+        public void PopulateData() {
+            ModFishing.Instance.Monitor.Log("Automatically populating fish.json with data from Fish.xnb and Locations.xnb", StardewModdingAPI.LogLevel.Info);
+            ModFishing.Instance.Monitor.Log("NOTE: If either of these files are modded, the config will reflect the changes! However, legendary fish and fish in the UndergroundMine are not being pulled from those files due to technical reasons.", StardewModdingAPI.LogLevel.Info);
 
             Dictionary<int, string> fish = Game1.content.Load<Dictionary<int, string>>("Data\\Fish");
             Dictionary<string, string> locations = Game1.content.Load<Dictionary<string, string>>("Data\\Locations");
 
             this.PossibleFish = this.PossibleFish ?? new Dictionary<string, Dictionary<int, FishData>>();
 
-            foreach (KeyValuePair<string, string> locationKV in locations) {
-                string location = locationKV.Key;
-                string[] locData = locationKV.Value.Split('/');
+            foreach (KeyValuePair<string, string> locationKv in locations) {
+                string location = locationKv.Key;
+                string[] locData = locationKv.Value.Split('/');
                 const int offset = 4;
 
                 Dictionary<int, FishData> possibleFish = this.PossibleFish.ContainsKey(location) ? this.PossibleFish[location] : new Dictionary<int, FishData> { };
@@ -83,7 +83,7 @@ namespace TehPers.Stardew.FishingOverhaul.Configs {
                             f = new FishData(chance, water, s, Convert.ToInt32(times[0]), Convert.ToInt32(times[1]), minDepth, minLevel, w);
                             possibleFish[id] = f;
                         } else {
-                            ModFishing.INSTANCE.Monitor.Log("A fish listed in Locations.xnb cannot be found in Fish.xnb! Make sure those files aren't corrupt. ID: " + id, LogLevel.Warn);
+                            ModFishing.Instance.Monitor.Log("A fish listed in Locations.xnb cannot be found in Fish.xnb! Make sure those files aren't corrupt. ID: " + id, LogLevel.Warn);
                         }
                     }
                 }
@@ -137,15 +137,16 @@ namespace TehPers.Stardew.FishingOverhaul.Configs {
                 this.MineLevel = mineLevel;
             }
 
-            public bool meetsCriteria(WaterType waterType, Season season, Weather weather, int time, int depth, int level) {
-                return (this.WaterType & waterType) > 0 && (this.Season & season) > 0 && (this.Weather & weather) > 0 && this.MinTime <= time && this.MaxTime >= time && depth >= this.MinCastDistance && level >= this.MinLevel;
+            public bool MeetsCriteria(WaterType waterType, Season season, Weather weather, int time, int depth, int level) {
+                // ReSharper disable once ConditionIsAlwaysTrueOrFalse
+                return (this.WaterType & waterType) > 0 && (this.Season & season) > 0 && (this.Weather & weather) > 0 && this.MinTime <= time && this.MaxTime >= time && (true || depth >= this.MinCastDistance) && level >= this.MinLevel;
             }
 
-            public bool meetsCriteria(WaterType waterType, Season season, Weather weather, int time, int depth, int level, int mineLevel) {
-                return this.meetsCriteria(waterType, season, weather, time, depth, level) && (this.MineLevel == -1 || mineLevel == this.MineLevel);
+            public bool MeetsCriteria(WaterType waterType, Season season, Weather weather, int time, int depth, int level, int mineLevel) {
+                return this.MeetsCriteria(waterType, season, weather, time, depth, level) && (this.MineLevel == -1 || mineLevel == this.MineLevel);
             }
 
-            public virtual float getWeightedChance(int depth, int level) {
+            public virtual float GetWeightedChance(int depth, int level) {
                 if (this.MinCastDistance >= 5) return (float) this.Chance + level / 50f;
                 return (float) (5 - depth) / (5 - this.MinCastDistance) * (float) this.Chance + level / 50f;
             }
