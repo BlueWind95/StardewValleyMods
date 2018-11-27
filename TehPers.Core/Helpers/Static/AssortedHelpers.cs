@@ -28,7 +28,7 @@ namespace TehPers.Core.Helpers.Static {
         /// <returns>A <see cref="TModel"/> if successfully parsed, else null</returns>
         public static TModel TryReadJsonFile<TModel>(this IModHelper helper, string file) where TModel : class {
             try {
-                return helper.ReadJsonFile<TModel>(file);
+                return helper.Data.ReadJsonFile<TModel>(file);
             } catch (Exception) {
                 return null;
             }
